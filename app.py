@@ -2,7 +2,7 @@ from re import search, findall, sub
 from urllib.parse import urlsplit
 from requests import get
 from json import loads, dumps
-from os import path
+from os import path, system
 from jinja2 import Template
 from traceback import format_exc
 import sys
@@ -268,5 +268,7 @@ def run(name="ysdata"):
 try:
     run()
 except Exception as e:
-    with open("ysWishData.log","w") as f:
-        f.write(format_exc())
+    print(format_exc())
+    print("哦!是Error")
+    print("如果你愿意，可以借助上面的错误信息去百度，应该会有解决方法，百度无效，可以在github上告诉我错误，我会尽可能协助解决。")
+    input("按回车键关闭...")
