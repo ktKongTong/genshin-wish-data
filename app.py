@@ -4,6 +4,7 @@ from requests import get
 from json import loads, dumps
 from os import path
 from jinja2 import Template
+from traceback import format_exc
 import sys
 
 
@@ -264,4 +265,8 @@ def run(name="ysdata"):
     renderHTML(data)
 
 
-run()
+try:
+    run()
+except Exception as e:
+    with open("ysWishData.log","w") as f:
+        f.write(format_exc())
