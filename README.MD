@@ -38,6 +38,8 @@
 也可在命令行中指定日志文件的目录再执行，如
 `./app.exe "./output_log.txt"`
 
-#### 运行结果:
+#### 运行结果
 会生成ysData.html和ysData.json文件，浏览器打开HTML文件即可看到结果，json文件是获取到的数据。
 
+#### 异常处理
+会在exe所在目录下生成ysWishData.log文件，里面即为错误信息
