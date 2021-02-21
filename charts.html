@@ -41,6 +41,7 @@
                 <el-divider></el-divider>
                 <el-rate disabled value="3"  :colors="stars3colors"></el-rate>
                 <span style="color: #f7ba2a">3星： {{ 0 }}({{ "%2f"|format(0) }}%)</span>
+                <el-divider></el-divider>
                 {% else %}
                 <el-rate value="5" disabled></el-rate>
                 <span style="color: #f7ba2a">5星： {{ item.rank5RoleList|length +item.rank5WeaponList|length }}({{ "%2f"|format((item.rank5RoleList|length+item.rank5WeaponList|length)*100/item.total) }}%)</span>
