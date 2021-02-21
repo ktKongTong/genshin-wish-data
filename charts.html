@@ -24,6 +24,16 @@
                 <el-divider direction="vertical"></el-divider>
                 合计{{ item.total*160 }}原石
                 <el-divider></el-divider>
+                {% if item.total==0 %}
+                <el-rate value="5" disabled></el-rate>
+                <span style="color: #f7ba2a">5星： {{ 0 }}({{ "%2f"|format(0) }}%)</span>
+                <el-divider></el-divider>
+                <el-rate disabled value="4"  :colors="stars4colors"></el-rate>
+                <span style="color: #f7ba2a">4星： {{ 0 }}({{ "%2f"|format(0) }}%)</span>
+                <el-divider></el-divider>
+                <el-rate disabled value="3"  :colors="stars3colors"></el-rate>
+                <span style="color: #f7ba2a">3星： {{ 0 }}({{ "%2f"|format(0) }}%)</span>
+                {% else %}
                 <el-rate value="5" disabled></el-rate>
                 <span style="color: #f7ba2a">5星： {{ item.rank5RoleList|length +item.rank5WeaponList|length }}({{ "%2f"|format((item.rank5RoleList|length+item.rank5WeaponList|length)*100/item.total) }}%)</span>
                 <el-divider></el-divider>
@@ -33,6 +43,7 @@
                 <el-rate disabled value="3"  :colors="stars3colors"></el-rate>
                 <span style="color:#2C64FF">3星： {{ item.rank3WeaponCount }}({{ "%2f"|format((item.rank3WeaponCount)*100/item.total) }}%)</span>
                 <el-divider></el-divider>
+                {% endif %}
                 {% if (item.rank5RoleList|length +item.rank5WeaponList|length)==0 %}
                     5星平均出货次数：<el-tag type="blue">真不幸，在这个池子你没还出过5星</el-tag>
                 {% else %}
@@ -85,7 +96,13 @@
     {% endfor %}
 </body>
 <script>
+    Highcharts.setOptions({
+		lang: {
+			noData: '哦，似乎你还没抽过这个池子'
+		}
+	});
 {% for item in data %}
+
     var {{item.name}} = Highcharts.chart('{{item.name}}', {
 
     credits: {
