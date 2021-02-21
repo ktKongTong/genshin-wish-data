@@ -2,7 +2,7 @@ from re import search, findall, sub
 from urllib.parse import urlsplit
 from requests import get
 from json import loads, dumps
-from os import path, system
+from os import path
 from jinja2 import Template
 from traceback import format_exc
 import sys
@@ -269,6 +269,5 @@ try:
     run()
 except Exception as e:
     print(format_exc())
-    print("哦!是Error")
-    print("如果你愿意，可以借助上面的错误信息去百度，应该会有解决方法，百度无效，可以在github上告诉我错误，我会尽可能协助解决。")
+    print("哦,是Error,如果你愿意的话，可以用上述信息百度，有助于问题解决，也可在GitHub反馈给开发者")
     input("按回车键关闭...")
