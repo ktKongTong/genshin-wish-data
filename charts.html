@@ -15,7 +15,15 @@
 <body>
     {% for item in data %}
         <div  style="display: flex">
+            {% if item.total==0 %}
+            <div class="pie-graph" class="empty" style="width:40%;height:400px;">
+                <p style="text-align:center;padding:150px 0">
+                哦!似乎你还没在该卡池抽过，来一发吧😀
+                </p>
+            </div>
+            {% else %}
             <div class="pie-graph" id="{{ item.name }}" style="width:40%;height:400px"></div>
+            {% endif %}
             <div style="width: 60%;display: flex" >
             <div class="data-describe" id="vue-{{ item.name }}" style="width:60%">
                 已累计{{ item.no5 }}抽未出货
@@ -96,13 +104,12 @@
     {% endfor %}
 </body>
 <script>
-    Highcharts.setOptions({
+	Highcharts.setOptions({
 		lang: {
-			noData: '哦，似乎你还没抽过这个池子'
+			noData: '暂无数据'
 		}
 	});
 {% for item in data %}
-
     var {{item.name}} = Highcharts.chart('{{item.name}}', {
 
     credits: {
@@ -128,6 +135,9 @@
 					color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
 				}
 			}
+		},
+        lang: {
+			noData: '哦，你似乎还没抽过这个卡池!快来一发吧😀'
 		}
     },
     series: {{ item.series|tojson }}
