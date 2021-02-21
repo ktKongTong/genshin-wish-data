@@ -18,7 +18,8 @@ def staticData():
 def elementColor():
     return {
         "草": "#96cd17",
-        "火": "#e36651",
+        # "火": "#e36651",
+        "火": "#f38b6f",
         "水": "#0ac4df",
         "雷": "#c689fc",
         "冰": "#b7fbfe",

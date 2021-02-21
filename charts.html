@@ -73,6 +73,26 @@
                         <el-tag type="warning">{{ i.name }}({{ i.count5 }})</el-tag>
                     {% endfor %}
                 {% endif %}
+                {% if item.rank4RoleList|length > 0 %}
+                    <el-divider></el-divider>
+                <el-collapse  value="0" @change="handleChange">
+                <el-collapse-item title="4星角色：" name="1-{{item.name}}">
+                    {% for i in item.rank4RoleList %}
+                        <el-tag effect="light" :color="getColorByName('{{ i.name }}')" style="color: black;margin:3px">{{ i.name }}</el-tag>
+                    {% endfor %}
+                </el-collapse-item>
+                <el-collapse>
+                {% endif %}
+                {% if item.rank4WeaponList|length > 0 %}
+                    <el-divider></el-divider>
+                <el-collapse  value="0" @change="handleChange">
+                <el-collapse-item title="4星武器：" name="2-{{item.name}}">
+                    {% for i in item.rank4WeaponList %}
+                        <el-tag color="#c689fc" style="color: white;margin:3px">{{ i.name }}</el-tag>
+                    {% endfor %}
+                </el-collapse-item>
+                <el-collapse>
+                {% endif %}
             </div>
             <div class="time" id="vue-time-{{ item.name }}" style="width: 40%">
                 <el-timeline style="font-size: 7px">
@@ -105,6 +125,16 @@
         </div>
     {% endfor %}
 </body>
+<style>
+    .el-collapse-item__header{
+        font-size: 16px;
+        border-bottom:1px !important;
+    }
+    .el-collapse{
+        border-top:1px !important;
+        border-bottom:1px !important;
+    }
+</style>
 <script>
 	Highcharts.setOptions({
 		lang: {
@@ -159,10 +189,15 @@
                 elemColor: {{staticdata.elementColor|tojson}},
                 stars4colors:["#AD1AF5","#AD1AF5","#AD1AF5"],
                 stars3colors:["#2C64FF","#2C64FF","#2C64FF"],
-                collapsed: false
+                collapsed: false,
+                activeNames: ['1-{{item.name}}'],
+                activeNames2: ['2-{{item.name}}']
             };
         },
         methods:{
+            handleChange(val) {
+                console.log(val);
+            },
             getColorByName: function (name){
                 console.log(name)
                 console.log(this.charAndWeaponInfo)

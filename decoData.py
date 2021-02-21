@@ -1,7 +1,8 @@
 # 对数据进行加工，便于渲染
 def decoData(data, name, text):
     data.reverse()
-    timeList, nameList, itemTypeList, rankTypeList, rank5WeaponList, rank5RoleList, rank5List = [], [], [], [], [], [], []
+    timeList, nameList, itemTypeList, rankTypeList = [], [], [], []
+    rank4WeaponList, rank4RoleList, rank5WeaponList, rank5RoleList, rank5List = [], [], [], [], []
     weapon3Count, weapon4Count, role4Count, weapon5Count, role5Count = 0, 0, 0, 0, 0
     # 五星计数器
     count5 = 1
@@ -24,7 +25,9 @@ def decoData(data, name, text):
             count5 += 1
             if item["item_type"] == "武器":
                 weapon4Count = weapon4Count + 1
+                rank4WeaponList.append(item)
             else:
+                rank4RoleList.append(item)
                 role4Count = role4Count + 1
         elif item["rank_type"] == "3":
             count5 += 1
@@ -50,6 +53,8 @@ def decoData(data, name, text):
     d["rank4RoleCount"] = role4Count
     d["rank4WeaponCount"] = weapon4Count
     d["rank3WeaponCount"] = weapon3Count
+    d["rank4RoleList"] = rank4RoleList
+    d["rank4WeaponList"] = rank4WeaponList
     d["rank5RoleList"] = rank5RoleList
     d["rank5WeaponList"] = rank5WeaponList
     d["rank5List"] = rank5List
