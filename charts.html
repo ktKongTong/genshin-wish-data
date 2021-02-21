@@ -17,6 +17,7 @@
         <div  style="display: flex">
             {% if item.total==0 %}
             <div class="pie-graph" class="empty" style="width:40%;height:400px;">
+                <p style="text-align:center;font-size: 18px">{{ item.text }}</p>
                 <p style="text-align:center;padding:150px 0">
                 哦!似乎你还没在该卡池抽过，来一发吧😀
                 </p>
@@ -110,7 +111,9 @@
 			noData: '暂无数据'
 		}
 	});
+
 {% for item in data %}
+    {% if item.total>0 %}
     var {{item.name}} = Highcharts.chart('{{item.name}}', {
 
     credits: {
@@ -143,6 +146,7 @@
     },
     series: {{ item.series|tojson }}
 });
+    {% endif %}
 {% endfor %}
 </script>
 <script>
