@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+    <script src="http://code.highcharts.com/highcharts.js"></script>
+    <script src="http://code.highcharts.com/highcharts-more.js"></script>
+    <script src="https://unpkg.com/highcharts/modules/exporting.js"></script>
+    <script src="https://unpkg.com/highcharts/modules/oldie.js"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.14.0/theme-chalk/index.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.12/vue.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.14.0/index.min.js"></script>
+</head>
+<body>
+    {% for item in data %}
+        <div  style="display: flex">
+            <div class="pie-graph" id="{{ item.name }}" style="width:40%;height:400px"></div>
+            <div style="width: 60%;display: flex" >
+            <div class="data-describe" id="vue-{{ item.name }}" style="width:60%">
+                已累计{{ item.no5 }}抽未出货
+                <el-divider direction="vertical"></el-divider>
+                总计{{ item.total }}抽
+                <el-divider direction="vertical"></el-divider>
+                合计{{ item.total*160 }}原石
+                <el-divider></el-divider>
+                <el-rate value="5" disabled></el-rate>
+                <span style="color: #f7ba2a">5星： {{ item.rank5RoleList|length +item.rank5WeaponList|length }}({{ "%2f"|format((item.rank5RoleList|length+item.rank5WeaponList|length)*100/item.total) }}%)</span>
+                <el-divider></el-divider>
+                <el-rate disabled value="4"  :colors="stars4colors"></el-rate>
+                <span style="color:#AD1AF5">4星： {{ item.rank4RoleCount + item.rank4WeaponCount }}({{ "%2f"|format((item.rank4RoleCount + item.rank4WeaponCount)*100/item.total) }}%)</span>
+                <el-divider></el-divider>
+                <el-rate disabled value="3"  :colors="stars3colors"></el-rate>
+                <span style="color:#2C64FF">3星： {{ item.rank3WeaponCount }}({{ "%2f"|format((item.rank3WeaponCount)*100/item.total) }}%)</span>
+                <el-divider></el-divider>
+                {% if (item.rank5RoleList|length +item.rank5WeaponList|length)==0 %}
+                    5星平均出货次数：<el-tag type="blue">真不幸，在这个池子你没还出过5星</el-tag>
+                {% else %}
+                    5星平均出货次数：<el-tag type="warning">{{ "%2f"|format((item.total - item.no5)/(item.rank5RoleList|length +item.rank5WeaponList|length)) }}</el-tag>
+                {% endif %}
+                {% if item.rank5RoleList|length > 0 %}
+                    <el-divider></el-divider>
+                    5星角色：
+                    {% for i in item.rank5RoleList %}
+                        <el-tag effect="light" :color="getColorByName('{{ i.name }}')" style="color: black;margin:3px">{{ i.name }}({{ i.count5 }})</el-tag>
+                    {% endfor %}
+                {% endif %}
+                {% if item.rank5WeaponList|length > 0 %}
+                    <el-divider></el-divider>
+                    5星武器：
+                    {% for i in item.rank5WeaponList %}
+                        <el-tag type="warning">{{ i.name }}({{ i.count5 }})</el-tag>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <div class="time" id="vue-time-{{ item.name }}" style="width: 40%">
+                <el-timeline style="font-size: 7px">
+                    {% for i in item.rank5List %}
+                        <el-timeline-item
+    {#                      :icon="activity.icon"#}
+    {#                      :type="activity.type"#}
+    {#                      :color="activity.color"#}
+    {#                      :size="activity.size"#}
+                          timestamp="{{ i.time }}">
+
+                          <el-card
+                            style="width:140px"
+                            shadow="hover"
+                            :body-style="{ padding: '1px 15px' }"
+                          >
+                            <h4>{{ i.name }}</h4>
+                              <el-image
+                                  style="width: 30px; height: 30px"
+                                  :src="getSrcByName('{{ i.name }}')"
+                                  ></el-image>
+                          </el-card>
+                        </el-timeline-item>
+                    {% endfor %}
+              </el-timeline>
+            </div>
+            </div>
+        </div>
+        <div id="bottom-vue-{{ item.name }}" style="height: 20px">
+        </div>
+    {% endfor %}
+</body>
+<script>
+{% for item in data %}
+    var {{item.name}} = Highcharts.chart('{{item.name}}', {
+
+    credits: {
+              enabled:false
+    },
+    chart: {
+        type: 'pie'
+    },
+    title: {
+        text: '{{ item.text }}'
+    },
+    tooltip: {
+		pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b><br>数量:<b>{point.values}</b>'
+	},
+    plotOptions: {
+        pie: {
+			allowPointSelect: true,
+			cursor: 'pointer',
+			dataLabels: {
+				enabled: true,
+				format: '<b>{point.name}({point.values})</b>: {point.percentage:.1f} %',
+				style: {
+					color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+				}
+			}
+		}
+    },
+    series: {{ item.series|tojson }}
+});
+{% endfor %}
+</script>
+<script>
+    {% for item in data %}
+    new Vue({
+        el: '#vue-{{ item.name }}',
+        data() {
+            return {
+                charAndWeaponInfo : {{ staticdata.charAndWeaponData|tojson }},
+                elemColor: {{staticdata.elementColor|tojson}},
+                stars4colors:["#AD1AF5","#AD1AF5","#AD1AF5"],
+                stars3colors:["#2C64FF","#2C64FF","#2C64FF"],
+                collapsed: false
+            };
+        },
+        methods:{
+            getColorByName: function (name){
+                console.log(name)
+                console.log(this.charAndWeaponInfo)
+                console.log(this.charAndWeaponInfo[name])
+                return this.elemColor[this.charAndWeaponInfo[name].elemType]
+            },
+        }
+    })
+    new Vue({
+        delimiters:['{[', ']}'],
+        el: '#vue-time-{{ item.name }}',
+        data() {
+            return {
+                charAndWeaponInfo : {{ staticdata.charAndWeaponData|tojson }},
+                collapsed: false
+            };
+        },
+        methods:{
+            getSrcByName:function (name){
+                item = this.charAndWeaponInfo[name]
+                return item.avatar
+            }
+        }
+    })
+    {% endfor %}
+</script>
+</html>
