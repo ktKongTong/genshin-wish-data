@@ -3,8 +3,8 @@
 block_cipher = None
 
 
-a = Analysis(['app.py'],
-             pathex=['C:\\Users\\23709\\PycharmProjects\\flaskProject'],
+a = Analysis(['main.py','getStaticData.py','getWishData.py','decoData.py','utils.py'],
+             pathex=['C:\\Users\\23709\\PycharmProjects\\genshin-wish-data'],
              binaries=[],
              datas=[('.\\charts.html','.')],
              hiddenimports=[],
@@ -23,7 +23,7 @@ exe = EXE(pyz,
           a.zipfiles,
           a.datas,
           [],
-          name='app',
+          name='genshin-wish-data',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
