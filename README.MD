@@ -8,7 +8,7 @@
 
 自己使用后效果如图，只是需要环境配置，花了好些时间😑。
 
-![P1](./pic/p1.png)
+![P1](https://cdn.jsdelivr.net/gh/ktKongTong/genshin-wish-data/pic/p1.png)
 
 因此想到使用python再实现一遍并打包为exe，方便使用
 
@@ -18,7 +18,7 @@
 
 目前效果如图
 
-![P1](./pic/p2.png)
+![P2](https://cdn.jsdelivr.net/gh/ktKongTong/genshin-wish-data/pic/p2.png)
 
 ### 获取数据的方式
 
