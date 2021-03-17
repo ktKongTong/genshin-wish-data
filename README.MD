@@ -43,6 +43,6 @@
 
 #### TODO
 
--[ ] 添加excel数据导出，方便用户使用[抽卡记录分析(成就)工具](https://genshin-gacha-analyzer.vercel.app/)
+- [ ] 添加excel数据导出，方便用户使用[抽卡记录分析(成就)工具](https://genshin-gacha-analyzer.vercel.app/)
 
--[ ] 界面优化
+- [ ] 界面优化
