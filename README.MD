@@ -42,5 +42,7 @@
 会生成ysData.html和ysData.json文件，浏览器打开HTML文件即可看到结果，json文件是获取到的数据。
 
 #### TODO
+
 -[ ] 添加excel数据导出，方便用户使用[抽卡记录分析(成就)工具](https://genshin-gacha-analyzer.vercel.app/)
+
 -[ ] 界面优化
