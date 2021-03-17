@@ -43,19 +43,23 @@ class Data:
     def getDataList(self, authkey, type, name):
         dL = []
         url = "https://hk4e-api.mihoyo.com/event/gacha_info/api/getGachaLog?authkey_ver=1&lang=zh-cn&authkey=" + authkey + "&size=6&gacha_type=" + type
+        endId = "0"
         page = 1
         hasData = True
         while hasData:
-            tmpurl = url + "&page=" + str(page)
+            tmpurl = url + "&page=" + str(page) + "&end_id=" + str(endId)
+            print(tmpurl)
             resp = get(tmpurl).content.decode(encoding="utf-8")
-            print("正在获取" + name + ",第" + str(page) + "页")
-            page = page + 1
             r = loads(resp)
             dataList = r["data"]["list"]
+            if len(dataList) == 0 or len(dataList)<6:
+                hasData = False
+            else:
+                endId = dataList[-1]['id']
+            print(name + "第" + str(page) + "页,获取完毕")
+            page = page + 1
             for item in r["data"]["list"]:
                 dL.append(item)
-            if len(dataList) == 0:
-                hasData = False
         return dL
 
     # 获取全部json数据
@@ -71,3 +75,4 @@ class Data:
                 "xsData": {"name": "xsData", "text": "新手祈愿", "data": xsData}
                 }
         return data
+
