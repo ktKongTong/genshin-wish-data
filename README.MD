@@ -41,5 +41,6 @@
 #### 运行结果
 会生成ysData.html和ysData.json文件，浏览器打开HTML文件即可看到结果，json文件是获取到的数据。
 
-#### 异常处理
-会在exe所在目录下生成ysWishData.log文件，里面即为错误信息
+#### TODO
+-[ ] 添加excel数据导出，方便用户使用[抽卡记录分析(成就)工具](https://genshin-gacha-analyzer.vercel.app/)
+-[ ] 界面优化
