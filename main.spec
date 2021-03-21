@@ -3,10 +3,10 @@
 block_cipher = None
 
 
-a = Analysis(['main.py','getStaticData.py','getWishData.py','decoData.py','utils.py'],
+a = Analysis(['main.py','getStaticData.py','getWishData.py','utils.py','dealData.py'],
              pathex=['C:\\Users\\23709\\PycharmProjects\\genshin-wish-data'],
              binaries=[],
-             datas=[('.\\charts.html','.')],
+             datas=[('.\\index.html','.'),('.\\wordpic.png','.'),('.\\origin.png','.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -30,4 +30,4 @@ exe = EXE(pyz,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=True , icon='exe.ico')
+          console=False , icon='exe.ico')

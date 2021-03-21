@@ -48,7 +48,7 @@ class Data:
         hasData = True
         while hasData:
             tmpurl = url + "&page=" + str(page) + "&end_id=" + str(endId)
-            print(tmpurl)
+            # print(tmpurl)
             resp = get(tmpurl).content.decode(encoding="utf-8")
             r = loads(resp)
             dataList = r["data"]["list"]
@@ -75,4 +75,19 @@ class Data:
                 "xsData": {"name": "xsData", "text": "新手祈愿", "data": xsData}
                 }
         return data
+
+    # def getDataNew(self):
+    #     authkey = self.authkey
+    #     normData = self.getDataList(authkey, "200", "常驻祈愿")
+    #     xsData = self.getDataList(authkey, "100", "新手祈愿")
+    #     weaponData = self.getDataList(authkey, "302", "武器活动祈愿")
+    #     roleData = self.getDataList(authkey, "301", "角色活动祈愿")
+    #     data = {"normData": {"name": "normData", "text": "常驻祈愿", "data": normData},
+    #             "weaponData": {"name": "weaponData", "text": "武器活动祈愿", "data": weaponData},
+    #             "roleData": {"name": "roleData", "text": "角色活动祈愿", "data": roleData},
+    #             "xsData": {"name": "xsData", "text": "新手祈愿", "data": xsData}
+    #             }
+# if __name__=="__main__":
+#     d = Data()
+#     print(d.data)
 

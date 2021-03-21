@@ -15,3 +15,6 @@ def loadDataFromJF(filename):
     with open(filename, "r", encoding="utf-8") as f:
         data = loads(f.read())
     return data
+
+# def saveToExcel(d,filename):
+#

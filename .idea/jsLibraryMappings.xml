@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="JavaScriptLibraryMappings">
-    <file url="file://$PROJECT_DIR$" libraries="{no-data-to-display}" />
+    <file url="file://$PROJECT_DIR$" libraries="{@mdi/font, @vue, echarts, echarts-wordcloud, vue-echarts, vuetify}" />
+    <file url="PROJECT" libraries="{@vue, echarts, index, jquery, vue, vue-echarts}" />
   </component>
 </project>

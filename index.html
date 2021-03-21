@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="https://cdn.bootcdn.net/ajax/libs/element-ui/2.14.0/theme-chalk/index.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.12/vue.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/element-ui/2.14.0/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@vue/composition-api@1.0.0-rc.3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.0.2"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ecomfe/echarts-wordcloud/dist/echarts-wordcloud.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-echarts@6.0.0-rc.3"></script>
+     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+<div id="app" style="margin: 10px 20px">
+    <div id="top-select" style="">
+        <div style="display: flex">
+            <el-button style="margin: 3px" plain v-loading.fullscreen.lock="loading" v-on:click="flashData">加载数据</el-button>
+             <el-date-picker
+                     style="margin: 0 auto"
+              v-model="dateValue"
+              type="datetimerange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>            
+        </div>
+        <el-checkbox-group v-model="checkboxGroup">
+            <el-checkbox  v-for="name in names" :label="name['value']" :key="name['value']">{{name["name"]}}</el-checkbox>
+        </el-checkbox-group>
+    </div>
+        <el-tabs v-model="activeName" @tab-click="handleClick">
+            <el-tab-pane label="总览" name="first">
+                <div style="display: flex">
+                    <div style="width: 55%">
+                        <v-chart style="height: 700px" autoresize :option="pieOption"/>
+                    </div>
+                    <div style="width: 45%">
+                        <el-rate value="5" disabled></el-rate>
+                        <el-collapse value="5" id="rank5" name="5" style="border-top: 0;border-bottom: 0">
+                            <div style="color:#f7ba2a;font-size: 16px;">平均出货次数:{{rank5Info.rank5Ave}}</div>
+                                <el-collapse-item  :title="rank5Info.rank5Title" name="5" style="border-top: 0;border-bottom: 0">
+                                    <el-tag v-for="i in rank5Info.rank5list" effect="light" style="color: black;margin:3px">{{ i['name'] }}({{i['rank_count']}})</el-tag>
+                                </el-collapse-item>
+                        <el-divider></el-divider>
+                        <el-rate disabled value="4"  :colors='["#AD1AF5","#AD1AF5","#AD1AF5"]'></el-rate>
+                            <div style="color:#AD1AF5;font-size: 16px;">平均出货次数:{{rank4Info.rank4Ave}}</div>
+                                <el-collapse-item id="rank4" name="4" :title="rank4Info.rank4Title" style="border-top: 0;border-bottom: 0">
+                                    <el-tag v-for="i in rank4Info.rank4list" effect="light" style="color: black;margin:3px">{{ i['name'] }}</el-tag>
+                                </el-collapse-item>
+                        </el-collapse>
+                        <el-divider></el-divider>
+                        <el-rate disabled value="3"  :colors='["#2C64FF","#2C64FF","#2C64FF"]'></el-rate>
+                        <span style="color:#2C64FF">{{ rank3Info.rank3Title }}</span>
+                        <el-divider></el-divider>
+                    </div>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane label="时间轴" name="second">
+                <v-app id="inspire">
+                    <v-timeline>
+                      <v-timeline-item v-for="item in rank5Info.rank5list"
+                        color="green lighten-1"
+                        reverse="true"
+                       style="margin: 0 auto; width: 500px"
+                      >
+                          <template v-slot:icon>
+                            <v-avatar>
+                              <img :src="item['avatar']">
+                            </v-avatar>
+                          </template>
+                          <v-card style="width: 300px">
+                            <v-card-title>
+                                {{item["name"]}}
+                            </v-card-title>
+                              <v-card-subtitle>
+                                {{item["time"]}}
+                              </v-card-subtitle>
+                          </v-card>
+                      </v-timeline-item>
+                    </v-timeline>
+                  </v-app>
+            </el-tab-pane>
+            <el-tab-pane label="祈愿次数" name="third">
+                <div>
+                    <v-chart style="height: 600px" autoresize :option="barOption"/>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane label="祈愿词云" name="fourth">
+                <div style="margin: 0 auto;text-align: center">
+                    <div style="margin: 0 auto">
+                        <v-chart style="height: 600px;width: 900px;margin: 0 auto"  autoresize :option="wordOption"/>
+                    </div>
+<!--                    <div style="margin: 0 auto;">-->
+                        <el-image id="origin" :src="picSrc" :style=" displayPic?'display: block':'display: none'" ></el-image>
+<!--                    </div>-->
+                </div>
+
+<!--                <el-button type="danger" v-on:click="flashWordCloudByTimeAndType">刷新词云</el-button>-->
+            </el-tab-pane>
+        </el-tabs>
+    <div style="display: none">{{test}}</div>
+</div>
+</body>
+<style>
+#origin{
+    width: 900px;
+    margin: 0 auto
+}
+.v-application--wrap{
+    min-height: auto !important;
+}
+    .el-collapse-item__wrap{
+        border-bottom:0 !important;
+    }
+    .el-collapse-item__header{
+        border-bottom:0 !important;
+    }
+    #rank5 .el-collapse-item__header{
+        color:#f7ba2a;
+        font-size: 16px;
+    }
+    #rank4 .el-collapse-item__header{
+        color:#AD1AF5;
+        font-size: 16px;
+    }
+</style>
+<script>
+    Vue.component("v-chart", VueECharts);
+    const myVue = new Vue({
+        el: '#app',
+        vuetify: new Vuetify(),
+		data() {
+            return {
+                checkboxGroup: ["100","200","301","302"],
+                names: [{"name":"新手祈愿", "value":"100"},{"name":"常驻祈愿", "value":"200"},{"name":"角色活动祈愿", "value":"301"},{"name":"武器活动祈愿", "value":"302"}],
+                pickerOptions: {
+                  shortcuts: [
+                      {
+                    text: '<div style="height:300px">test</div>',
+                    onClick(picker) {
+                      const end = new Date();
+                      const start = new Date();
+                      start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                      picker.$emit('pick', [start, end]);
+                    }
+                  },
+                      {
+                    text: '最近一个月',
+                    onClick(picker) {
+                      const end = new Date();
+                      const start = new Date();
+                      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                      picker.$emit('pick', [start, end]);
+                    }
+                  },
+                      {
+                    text: '<h1>test<h1>',
+                    onClick(picker) {
+                      const end = new Date();
+                      const start = new Date();
+                      start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                      picker.$emit('pick', [start, end]);
+                    }
+                    }
+                  ]
+                },
+                dateValue: [new Date("2020-09-15 08:00:00"), new Date()],
+                activeName: 'first',
+                pieOption:{
+                    title: {
+                        text: '祈愿总览',
+                        left: 'center'
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function (params) {
+                            let str = params.name + "<br />";
+
+                            str=str+"数量:"+params.value
+                            let per = params.percent
+
+                            str = str+"<br/>占比:"+per+"%"
+                            return str;
+                      },
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left',
+                    },
+                    color:['#5470c6', '#AD1AF5', '#fac858', '#ff8c00', '#ffe700'],
+                    series: [
+                        {
+                            name: ' ',
+                            type: 'pie',
+                            radius: '50%',
+                            label:{
+                                formatter: '{b}({c}): {d}%',
+                                color:"#fac858"
+                            },
+                            data: [],
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            }
+                        }
+                    ]
+                },
+                wordOption: {
+                    tooltip:{
+                        trigger: 'item',
+                        triggerOn: "mousemove",
+                        formatter:"{b0}: {c0}"
+                    },
+                    series: [{
+                    name: '祈愿词云',
+                    type: 'wordCloud',
+                    maskImage: '',
+                    left: 'center',
+                    top: 'center',
+                    width: '70%',
+                    height: '80%',
+                    right: null,
+                    bottom: null,
+                    sizeRange: [20, 35],
+                    rotationRange: [-90, 90],
+                    rotationStep: 45,
+                    gridSize: 1,
+                    // drawOutOfBound: false,
+                    layoutAnimation: true,
+                    textStyle: {
+                        fontFamily: 'sans-serif',
+                        fontWeight: 'bold',
+                        // color:['#5470c6', '#AD1AF5', '#fac858', '#ff8c00', '#ffe700'],
+                        color: function () {
+                            // Random color
+                            return 'rgb(' + [
+                                Math.round(Math.random() * 160),
+                                Math.round(Math.random() * 160),
+                                Math.round(Math.random() * 160)
+                            ].join(',') + ')';
+                        }
+                    },
+                    emphasis: {
+                        focus: 'self',
+                        textStyle: {
+                            shadowBlur: 10,
+                            shadowColor: '#333'
+                        }
+                    },
+                    data: []
+                }]
+                },
+                barOption: {
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                            type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                        }
+                    },
+                color:['#5470c6', '#AD1AF5', '#fac858', '#ff8c00', '#ffe700'],
+                legend: {
+                    data: []
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: [' ']
+                    }
+                ],
+
+                yAxis: [{type: 'value'}],
+                dataZoom: [
+                    {
+                        type: 'inside'
+                    }
+                ],
+                series:[]
+                },
+                rank5Info:{
+                    rank5list:[],
+                    rank5Rate:0,
+                    rank5Ave:0,
+                    rank5Title:"5星  0%",
+                },
+                rank4Info:{
+                    rank4Rate:0,
+                    rank4list:[],
+                    rank4Ave:0,
+                    rank4Title:"4星  0%",
+                },
+                rank3Info:{
+                    rank3Rate:0,
+                    rank3list:[],
+                    rank3Title:"3星  0%",
+                },
+                totalCount:0,
+                time : 0,
+                loading: false,
+                activeNames: ['5'],
+                displayPic:false,
+                picSrc:"",
+                loadState:true,
+                test:""
+            }
+        },
+        mounted(){
+        },
+        methods:{
+
+            handleClick(tab, event) {
+                console.log(tab, event);
+            },
+            handleChange(val) {
+                console.log(val);
+            },
+             dateTimeToString(date) {
+                var y = date.getFullYear();
+                var M = date.getMonth() + 1;
+                var d = date.getDate();
+                var H = date.getHours();
+                var m = date.getMinutes();
+                var s = date.getSeconds();
+                return y + '-' + (M < 10 ? ('0' + M) : M) + '-' + (d < 10 ? ('0' + d) : d) + " " + (H < 10 ? ('0' + H) : H) + ":" + (m < 10 ? ('0' + m) : m) + ":" + (s < 10 ? ('0' + s) : s);
+            },
+
+             flashData() {
+                if (this.time === 0) {
+                    this.loading = true
+                    pywebview.api.init().then((res) => {
+                        this.loading = false
+                        this.loadState = false
+                        this.flashData()
+                    })
+                    //循环获取state
+                    while (this.loadState) {
+                        pywebview.api.getState().then((res) => {
+                            this.$notify({
+                                title: res.title,
+                                message: res.message,
+                                duration: 2000,
+                            })
+                        })
+                        test()
+                        // stop()
+                        // await sleep(1000)
+                        // this.sleep(2000);
+                    }
+                }
+                this.time += 1
+                let startTime = this.dateTimeToString(this.dateValue[0])
+                let endTime = this.dateTimeToString(this.dateValue[1])
+                let gachaTypeList = this.checkboxGroup
+                this.getTotalData(startTime, endTime, gachaTypeList)
+                this.flashWordCloudByTimeAndType(startTime, endTime, gachaTypeList)
+                this.flashBarByTimeAndType(startTime, endTime, gachaTypeList)
+                this.getTotalDataByTimeAndType(startTime, endTime, gachaTypeList)
+                this.getRank5List(startTime, endTime, gachaTypeList)
+            },
+            getTotalData(startTime,endTime,gachaTypeList){
+                pywebview.api.getRateData(startTime,endTime,gachaTypeList).then((res)=>{
+					this.rank5Info.rank5Rate=res.rate[0]
+                    this.rank5Info.rank4Rate=res.rate[1]
+                    this.rank5Info.rank3Rate=res.rate[2]
+                    this.totalCount = res.totalCount
+                    this.rank5Info.rank5Title = '5星 '+res.rate[0]+'%'
+                    this.rank4Info.rank4Title = '4星 '+res.rate[1]+'%'
+                    this.rank3Info.rank3Title = '3星 '+res.rate[2]+'%'
+				})
+
+            },
+            //获取总览数据
+            getRank5List(startTime,endTime,gachaTypeList){
+                pywebview.api.getTimeLine(startTime,endTime,gachaTypeList,["5"]).then((res)=>{
+					this.rank5Info.rank5list = res.data
+                    this.rank5Info.rank5list = this.rank5Info.rank5list.reverse()
+                    this.rank5Info.rank5Ave = res.ave
+				})
+                pywebview.api.getTimeLine(startTime,endTime,gachaTypeList,["4"]).then((res)=>{
+					this.rank4Info.rank4list = res.data
+                    this.rank4Info.rank4list = this.rank4Info.rank4list.reverse()
+                    this.rank4Info.rank4Ave = res.ave
+				})
+            },
+            //获取总览数据
+            getTotalDataByTimeAndType(startTime,endTime,gachaTypeList){
+                pywebview.api.getPieData(startTime,endTime,gachaTypeList).then((res)=>{
+					this.pieOption.series[0].data=res.data
+				})
+            },
+            //获取条形图数据，祈愿次数
+            flashBarByTimeAndType(startTime,endTime,gachaTypeList){
+              pywebview.api.getBarData(startTime,endTime,gachaTypeList).then((res)=>{
+					this.barOption.series=res.data.series
+                    this.barOption.legend.data = res.data.legendData
+                      this.barOption.xAxis[0].data = res.data.xAxisData
+				})
+            },
+            // 获取词云
+            flashWordCloudByTimeAndType(startTime,endTime,gachaTypeList) {
+                var that = this
+        		pywebview.api.getWorldPic().then((res)=>{
+        		    that.picSrc =res.src
+                    that.test=that.picSrc
+        		    that.displayPic = true
+        		    var maskImage = new Image()
+                    maskImage.src =res.data
+                    maskImage.onload = function() {
+                        that.wordOption.series[0].maskImage = maskImage
+                    }
+
+				})
+                pywebview.api.getWordData(startTime,endTime,gachaTypeList).then((res)=>{
+					this.wordOption.series[0].data=res.data
+				})
+			},
+
+        }
+    })
+    function sleep(numberMillis){
+                var now = new Date();
+                var exitTime = now.getTime() + numberMillis;
+                while (true){
+                    now = new Date();
+                    if (now.getTime() > exitTime){
+                        break;
+                    }
+                }
+            }
+</script>
+</html>

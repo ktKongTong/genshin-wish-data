@@ -1,8 +1,9 @@
 # 角色，元素等静态信息
 from re import search, findall, sub
 from requests import get
-
 # 角色，元素等静态信息
+
+
 def staticData():
     d = {
         "elementColor": elementColor(),
@@ -74,3 +75,22 @@ def getRoleInfo():
             "type": "角色"
         })
     return charList
+
+
+# if __name__=="__main__":
+#     # charList = getRoleInfo()
+#     # weaponList = getWeaponInfo()
+#     # df = DataFrame(charList)
+#     # df2 = DataFrame(weaponList)
+#     # df = df.merge(df2,how="outer").fillna("None")
+#     # df = df.set_index(['name'])
+#     # print(df.index.tolist())
+#     # res = df.loc["安柏"]
+#     # print(res.to_dict())
+#     data = loadDataFromJF("./ysdata.json")
+#     df = DataFrame(data["roleData"]["data"])
+#     df.drop("uid", axis=1, inplace=True)
+#     df.drop("item_id", axis=1, inplace=True)
+#     df.drop("lang", axis=1, inplace=True)
+#     df.drop("id", axis=1, inplace=True)
+#     df['time'] = df['time'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
