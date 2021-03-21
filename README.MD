@@ -40,7 +40,7 @@
 会生成ysData.json文件，json文件是获取到的数据。
 
 #### TODO
-
+- [ ] 添加日志，方便查错
 - [ ] 添加excel数据导出，方便用户使用[抽卡记录分析(成就)工具](https://genshin-gacha-analyzer.vercel.app/)
 - [ ] 添加快捷选择祈愿池子功能
 - [ ] 界面优化
