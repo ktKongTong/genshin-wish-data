@@ -10,15 +10,16 @@
 
 ![P1](https://cdn.jsdelivr.net/gh/ktKongTong/genshin-wish-data/pic/p1.png)
 
-因此想到使用python再实现一遍并打包为exe，方便使用
-
-用python获取数据,Jinja2渲染
-
-图表使用HighCharts,其余部分使用Vue+Element-ui
+全新升级
+- 增加支持缩放的条形图，词云，5星时间轴
+- <h3 style="color:#f7ba2a">支持范围时间<h3>
+- 支持任意祈愿组合
 
 目前效果如图
-
-![P2](https://cdn.jsdelivr.net/gh/ktKongTong/genshin-wish-data/pic/p2.png)
+![P3](https://cdn.jsdelivr.net/gh/ktKongTong/genshin-wish-data/pic/p3.png)
+![P4](https://cdn.jsdelivr.net/gh/ktKongTong/genshin-wish-data/pic/p4.png)
+![P5](https://cdn.jsdelivr.net/gh/ktKongTong/genshin-wish-data/pic/p5.png)
+![P6](https://cdn.jsdelivr.net/gh/ktKongTong/genshin-wish-data/pic/p6.png)
 
 ### 获取数据的方式
 
@@ -33,16 +34,12 @@
 
 - 仅适用于国服PC
 - 正常运行的前提是24h内登入原神且有查询过祈愿记录(否则闪退)
-
-正常情况下，直接运行exe文件即可。
-也可在命令行中指定日志文件的目录再执行，如
-`./app.exe "./output_log.txt"`
+- 运行之后点击加载数据，等待一段时间(取决于你的祈愿数量)
 
 #### 运行结果
-会生成ysData.html和ysData.json文件，浏览器打开HTML文件即可看到结果，json文件是获取到的数据。
+会生成ysData.json文件，json文件是获取到的数据。
 
 #### TODO
 
 - [ ] 添加excel数据导出，方便用户使用[抽卡记录分析(成就)工具](https://genshin-gacha-analyzer.vercel.app/)
-
 - [ ] 界面优化
