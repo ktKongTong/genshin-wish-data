@@ -8,7 +8,6 @@ from utils import base64encode
 
 class Api():
     def init(self,isLoadFromJF=True):
-        print(isLoadFromJF)
         self.gacha = GachaData(isLoadFromJF)
         self.df = self.gacha.totalDF
         # 四星五星list
