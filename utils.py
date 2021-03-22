@@ -1,3 +1,4 @@
+import base64
 from json import loads,dumps
 
 
@@ -16,5 +17,13 @@ def loadDataFromJF(filename):
         data = loads(f.read())
     return data
 
+
+
+def base64encode(fp):
+    with open(fp, 'rb') as img_file:
+        img_b64encode = base64.b64encode(img_file.read())
+        s = img_b64encode.decode()
+        res = 'data:image/jpeg;base64,%s' % s
+        return res
+
 # def saveToExcel(d,filename):
-#

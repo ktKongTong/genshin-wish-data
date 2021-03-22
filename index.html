@@ -21,16 +21,20 @@
 <body>
 <div id="app" style="margin: 10px 20px">
     <div id="top-select" style="">
-        <div style="display: flex">
-            <el-button style="margin: 3px" plain v-loading.fullscreen.lock="loading" v-on:click="flashData">加载数据</el-button>
-             <el-date-picker
+        <div style="display: flex;align-items: center">
+
+            <el-button style="margin:0 3px;padding: 12px" plain v-loading="loading" v-on:click="switchState?flashData():loadData(true)">{{switchState?"刷新数据":"加载数据"}}</el-button>
+             <el-switch
+              v-model="switchState" active-color="#13ce66" inactive-color="#d1d1d1">
+            </el-switch>
+            <el-date-picker
                      style="margin: 0 auto"
               v-model="dateValue"
               type="datetimerange"
               range-separator="至"
               start-placeholder="开始日期"
               end-placeholder="结束日期">
-            </el-date-picker>            
+            </el-date-picker>
         </div>
         <el-checkbox-group v-model="checkboxGroup">
             <el-checkbox  v-for="name in names" :label="name['value']" :key="name['value']">{{name["name"]}}</el-checkbox>
@@ -98,15 +102,32 @@
                     <div style="margin: 0 auto">
                         <v-chart style="height: 600px;width: 900px;margin: 0 auto"  autoresize :option="wordOption"/>
                     </div>
-<!--                    <div style="margin: 0 auto;">-->
                         <el-image id="origin" :src="picSrc" :style=" displayPic?'display: block':'display: none'" ></el-image>
-<!--                    </div>-->
                 </div>
 
 <!--                <el-button type="danger" v-on:click="flashWordCloudByTimeAndType">刷新词云</el-button>-->
             </el-tab-pane>
         </el-tabs>
     <div style="display: none">{{test}}</div>
+    <el-dialog
+      :title="loadTitle"
+      :close-on-press-escape="false"
+      :show-close="false"
+      :close-on-click-modal="false"
+      :visible.sync="dialogVisible"
+      width="90%">
+        <el-alert :title="loadMsg" :closable="false" type="info" center style="margin: 5px;font-size: 13px !important;color: #2C64FF"></el-alert>
+        <el-steps :active="loadStep" finish-status="success" align-center>
+          <el-step title="读取MiHoYo日志文件/json文件"></el-step>
+          <el-step title="获取新手祈愿"></el-step>
+          <el-step title="获取常驻祈愿"></el-step>
+          <el-step title="获取角色活动祈愿"></el-step>
+          <el-step title="获取武器获取祈愿"></el-step>
+          <el-step title="数据处理"></el-step>
+          <el-step title="完成"></el-step>
+        </el-steps>
+    </el-dialog>
+
 </div>
 </body>
 <style>
@@ -134,13 +155,12 @@
 </style>
 <script>
     Vue.component("v-chart", VueECharts);
-    const myVue = new Vue({
+    new Vue({
         el: '#app',
         vuetify: new Vuetify(),
 		data() {
             return {
-                checkboxGroup: ["100","200","301","302"],
-                names: [{"name":"新手祈愿", "value":"100"},{"name":"常驻祈愿", "value":"200"},{"name":"角色活动祈愿", "value":"301"},{"name":"武器活动祈愿", "value":"302"}],
+                // staticData
                 pickerOptions: {
                   shortcuts: [
                       {
@@ -172,8 +192,12 @@
                     }
                   ]
                 },
-                dateValue: [new Date("2020-09-15 08:00:00"), new Date()],
+                names: [{"name":"新手祈愿", "value":"100"},{"name":"常驻祈愿", "value":"200"},{"name":"角色活动祈愿", "value":"301"},{"name":"武器活动祈愿", "value":"302"}],
                 activeName: 'first',
+
+                dialogVisible:false,
+                checkboxGroup: ["100","200","301","302"],
+                dateValue: [new Date("2020-09-15 08:00:00"), new Date()],
                 pieOption:{
                     title: {
                         text: '祈愿总览',
@@ -310,20 +334,39 @@
                     rank3list:[],
                     rank3Title:"3星  0%",
                 },
+                switchState:false,
                 totalCount:0,
                 time : 0,
                 loading: false,
-                activeNames: ['5'],
                 displayPic:false,
                 picSrc:"",
+                loadStep:0,
                 loadState:true,
-                test:""
+                loadTitle:"状态",
+                loadMsg:"获取数据",
+
+                test:"",
+                // activeNames: ['5'],
             }
         },
         mounted(){
         },
         methods:{
-
+            vueInit(){
+                this.dialogVisible=false
+                this.checkboxGroup= ["100","200","301","302"]
+                this.dateValue= [new Date("2020-09-15 08:00:00"), new Date()]
+                this.totalCount=0
+                this.time = 0
+                this.loading= false
+                this.displayPic=false
+                this.picSrc=""
+                this.loadStep=0
+                this.loadState=true
+                this.loadTitle="状态"
+                this.loadMsg="获取数据"
+                this.switchState = false
+            },
             handleClick(tab, event) {
                 console.log(tab, event);
             },
@@ -340,38 +383,47 @@
                 return y + '-' + (M < 10 ? ('0' + M) : M) + '-' + (d < 10 ? ('0' + d) : d) + " " + (H < 10 ? ('0' + H) : H) + ":" + (m < 10 ? ('0' + m) : m) + ":" + (s < 10 ? ('0' + s) : s);
             },
 
-             flashData() {
+            loadstate(){
+                pywebview.api.getState().then((res) => {
+                    this.loadStep = res.loadStep
+                    this.loadTitle = res.loadTitle
+                    this.loadMsg = res.loadMsg
+              })
+            },
+            loadFinish(){
+                this.loadState = false
+                this.loadData(true)
+                this.dialogVisible=false
+            },
+            // 刷新数据
+            flashData(){
+                this.vueInit()
+                this.loadData(false)
+            },
+             loadData(isLoadFromJF) {
+                var that = this
                 if (this.time === 0) {
                     this.loading = true
-                    pywebview.api.init().then((res) => {
+                    this.dialogVisible=true
+                    var flag = setInterval(this.loadstate,200)
+                    pywebview.api.init(isLoadFromJF).then((res) => {
                         this.loading = false
-                        this.loadState = false
-                        this.flashData()
+                        setTimeout(function () {
+                        that.loadFinish()
+                        },1000)
+                        clearInterval(flag)
                     })
-                    //循环获取state
-                    while (this.loadState) {
-                        pywebview.api.getState().then((res) => {
-                            this.$notify({
-                                title: res.title,
-                                message: res.message,
-                                duration: 2000,
-                            })
-                        })
-                        test()
-                        // stop()
-                        // await sleep(1000)
-                        // this.sleep(2000);
-                    }
+                }else{
+                    let startTime = this.dateTimeToString(this.dateValue[0])
+                    let endTime = this.dateTimeToString(this.dateValue[1])
+                    let gachaTypeList = this.checkboxGroup
+                    this.getTotalData(startTime, endTime, gachaTypeList)
+                    this.flashWordCloudByTimeAndType(startTime, endTime, gachaTypeList)
+                    this.flashBarByTimeAndType(startTime, endTime, gachaTypeList)
+                    this.getTotalDataByTimeAndType(startTime, endTime, gachaTypeList)
+                    this.getRank5List(startTime, endTime, gachaTypeList)
                 }
                 this.time += 1
-                let startTime = this.dateTimeToString(this.dateValue[0])
-                let endTime = this.dateTimeToString(this.dateValue[1])
-                let gachaTypeList = this.checkboxGroup
-                this.getTotalData(startTime, endTime, gachaTypeList)
-                this.flashWordCloudByTimeAndType(startTime, endTime, gachaTypeList)
-                this.flashBarByTimeAndType(startTime, endTime, gachaTypeList)
-                this.getTotalDataByTimeAndType(startTime, endTime, gachaTypeList)
-                this.getRank5List(startTime, endTime, gachaTypeList)
             },
             getTotalData(startTime,endTime,gachaTypeList){
                 pywebview.api.getRateData(startTime,endTime,gachaTypeList).then((res)=>{
@@ -383,7 +435,6 @@
                     this.rank4Info.rank4Title = '4星 '+res.rate[1]+'%'
                     this.rank3Info.rank3Title = '3星 '+res.rate[2]+'%'
 				})
-
             },
             //获取总览数据
             getRank5List(startTime,endTime,gachaTypeList){
@@ -415,7 +466,7 @@
             // 获取词云
             flashWordCloudByTimeAndType(startTime,endTime,gachaTypeList) {
                 var that = this
-        		pywebview.api.getWorldPic().then((res)=>{
+        		pywebview.api.getWordPic().then((res)=>{
         		    that.picSrc =res.src
                     that.test=that.picSrc
         		    that.displayPic = true
@@ -424,24 +475,12 @@
                     maskImage.onload = function() {
                         that.wordOption.series[0].maskImage = maskImage
                     }
-
 				})
                 pywebview.api.getWordData(startTime,endTime,gachaTypeList).then((res)=>{
 					this.wordOption.series[0].data=res.data
 				})
 			},
-
         }
     })
-    function sleep(numberMillis){
-                var now = new Date();
-                var exitTime = now.getTime() + numberMillis;
-                while (true){
-                    now = new Date();
-                    if (now.getTime() > exitTime){
-                        break;
-                    }
-                }
-            }
 </script>
 </html>

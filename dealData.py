@@ -5,23 +5,42 @@
 # 3.抽卡次数
 from datetime import datetime
 from pandas import DataFrame
-from getWishData import Data
+from getWishData import Data, setState
 from getStaticData import getRoleInfo, getWeaponInfo
 from utils import loadDataFromJF,saveToJF
 from pandas import concat
 
 
+
 class GachaData():
-    def __init__(self):
-        try:
-            data = loadDataFromJF("./ysdata.json")
-        except FileNotFoundError as e:
-            d = Data()
-            data = d.data
-            saveToJF(data, "ysdata")
-        self.getMyData(data)
-        self.charList = getRoleInfo()
+    def __init__(self,isLoadFromJF=True):
+        if isLoadFromJF:
+            try:
+                setState(0, "尝试从json文件中加载数据")
+                data = loadDataFromJF("./ysdata.json")
+                setState(5, "成功从json文件获取数据")
+            except FileNotFoundError as e:
+                d = Data()
+                data = d.data
+                saveToJF(data, "ysdata")
+        else:
+                d = Data()
+                data = d.data
+                saveToJF(data, "ysdata")
+        setState(5, "开始进行数据处理")
         self.weaponList = getWeaponInfo()
+        self.charList = getRoleInfo()
+        self.getMyData(data)
+
+
+    # 刷新数据
+    def flashData(self):
+        d = Data()
+        data = d.data
+        saveToJF(data, "ysdata")
+        self.getMyData(data)
+
+
     # 获取数据，total和分开
     def getMyData(self,data):
         self.xsDF = DataFrame(data["xsData"]["data"])
@@ -106,28 +125,24 @@ class GachaData():
         wordDictList = [{"name": item, "value": wordDict[item]} for item in wordDict]
         return wordDictList
 
+    def getRankCount( self,df, rank):
+        df.iloc[:] = df.iloc[::-1].values
+        df = df.sort_values(by=["id"], ascending=True)
+        query = "rank_type=='{}'".format(rank)
+        if rank == "4":
+            query = "rank_type=='4' or rank_type =='5'"
+        df: DataFrame = df.query(query)
+        rankCount:DataFrame = df.index.to_frame()-df.index.to_frame().shift(1).fillna(-1)
+        df.insert(df.shape[1],"rank_count",rankCount[0])
+        if rank == "4":
+            df = df.query('rank_type=="4"')
+        return df
     #     获取所有4星,五星数据
     def getRankList(self):
-        def getRankCount( df, rank):
-            df.iloc[:] = df.iloc[::-1].values
-            df = df.reset_index()
-            df = df.sort_values(by=["id"], ascending=False)
-            query = "rank_type=='{}'".format(rank)
-            if rank == "4":
-                query = "rank_type=='4' or rank_type =='5'"
-            df: DataFrame = df.query(query)
-            df.iloc[:] = df.iloc[::-1].values
-            df.loc[:, "pre_index"] = df.loc[:, "index"].shift(1).fillna(-1)
-            df["rank_count"] = df["index"] - df["pre_index"]
-            if rank == "4":
-                df = df.query('rank_type=="4"')
-            df.drop("index", axis=1, inplace=True)
-            df.drop("pre_index", axis=1, inplace=True)
-            return df
         res = DataFrame([],columns=['gacha_type', 'count', 'time', 'name','item_type',"rank_type","id","rank_count"])
         for item in [self.roleDF,self.xsDF,self.weaponDF,self.normDF]:
-            lastDF = getRankCount(item.copy(), "5")
-            lastDF2 = getRankCount(item.copy(), "4")
+            lastDF = self.getRankCount(item.copy(), "5")
+            lastDF2 = self.getRankCount(item.copy(), "4")
             res = concat([lastDF2.copy(),res.copy()])
             res = concat([lastDF.copy(), res.copy()])
         res:DataFrame = res.sort_values(by=["id"]).reset_index(drop=True)
@@ -138,13 +153,16 @@ class GachaData():
         result = res.merge(df[["name","avatar"]],on='name').sort_values(by=["id"]).reset_index(drop=True)
         return result
 
+# 加载新数据
+from pandas import set_option
+if __name__=="__main__":
 
-
-# if __name__=="__main__":
-#     pd.set_option('display.max_rows', 500)
-#     pd.set_option('display.max_columns', 500)
-#     pd.set_option('display.width', 1000)
-#     d = GachaData()
+    set_option('display.max_rows', 500)
+    set_option('display.max_columns', 500)
+    set_option('display.width', 1000)
+    d = GachaData()
+    res = d.getRankCount(d.roleDF,"4")
+    print(res)
 #     res = d.getRankList()
 #     res=d.filterData(res,gachaTypeList=["100","200"],rankList=[5])
 #     res = res.reset_index(drop=True)
