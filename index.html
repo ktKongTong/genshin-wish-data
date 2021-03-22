@@ -22,8 +22,7 @@
 <div id="app" style="margin: 10px 20px">
     <div id="top-select" style="">
         <div style="display: flex;align-items: center">
-
-            <el-button style="margin:0 3px;padding: 12px" plain v-loading="loading" v-on:click="switchState?flashData():loadData(true)">{{switchState?"刷新数据":"加载数据"}}</el-button>
+            <el-button style="margin:0 3px;padding: 12px" type="primary" plain v-loading="loading" v-on:click="switchState?flashData():loadData(true)">{{switchState?"刷新数据":"加载数据"}}</el-button>
              <el-switch
               v-model="switchState" active-color="#13ce66" inactive-color="#d1d1d1">
             </el-switch>
@@ -35,6 +34,7 @@
               start-placeholder="开始日期"
               end-placeholder="结束日期">
             </el-date-picker>
+            <el-button style="margin-right:30px;padding: 12px" type="success" plain v-on:click="exportExcel" :disabled="time===0">Excel导出</el-button>
         </div>
         <el-checkbox-group v-model="checkboxGroup">
             <el-checkbox  v-for="name in names" :label="name['value']" :key="name['value']">{{name["name"]}}</el-checkbox>
@@ -127,7 +127,6 @@
           <el-step title="完成"></el-step>
         </el-steps>
     </el-dialog>
-
 </div>
 </body>
 <style>
@@ -480,6 +479,11 @@
 					this.wordOption.series[0].data=res.data
 				})
 			},
+            exportExcel(){
+                pywebview.api.genExcel().then((res)=>{
+                    this.$message(res.msg)
+                })
+            }
         }
     })
 </script>

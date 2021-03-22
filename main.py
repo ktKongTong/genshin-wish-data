@@ -71,6 +71,10 @@ class Api():
                     'totalCount': int(totalCount)}
         return response
 
+    def genExcel(self):
+        self.gacha.genExcelData()
+        response = {'msg':"excel文件导出完成"}
+        return response
     # todo 添加自定义图片
     def getWordPic(self, fp='./wordpic.png'):
         if getattr(sys, 'frozen', None):
