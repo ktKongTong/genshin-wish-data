@@ -481,7 +481,11 @@
 			},
             exportExcel(){
                 pywebview.api.genExcel().then((res)=>{
-                    this.$message(res.msg)
+                    this.$message({
+                      showClose: true,
+                      message: res.msg,
+                      type: 'success'
+                    });
                 })
             }
         }
