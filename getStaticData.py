@@ -77,9 +77,10 @@ def getRoleInfo():
     return charList
 
 
-# if __name__=="__main__":
-#     # charList = getRoleInfo()
-#     # weaponList = getWeaponInfo()
+if __name__=="__main__":
+    charList = getRoleInfo()
+    weaponList = getWeaponInfo()
+    print(weaponList)
 #     # df = DataFrame(charList)
 #     # df2 = DataFrame(weaponList)
 #     # df = df.merge(df2,how="outer").fillna("None")

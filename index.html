@@ -479,6 +479,7 @@
 					this.wordOption.series[0].data=res.data
 				})
 			},
+            //导出excel
             exportExcel(){
                 pywebview.api.genExcel().then((res)=>{
                     this.$message({

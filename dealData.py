@@ -30,6 +30,7 @@ class GachaData():
         self.weaponList = getWeaponInfo()
         self.charList = getRoleInfo()
         self.getMyData(data)
+        setState(5, "数据处理")
 
     # 刷新数据
     def flashData(self):
@@ -40,20 +41,20 @@ class GachaData():
 
     # 获取数据，total和分开
     def getMyData(self, data):
-        self.xsDF = DataFrame(data["xsData"]["data"])
-        self.normDF = DataFrame(data["normData"]["data"])
-        self.roleDF = DataFrame(data["roleData"]["data"])
-        self.weaponDF = DataFrame(data["weaponData"]["data"])
-        for item in [self.xsDF, self.normDF, self.roleDF, self.weaponDF]:
-            item.drop("uid", axis=1, inplace=True)
-            item.drop("item_id", axis=1, inplace=True)
-            item.drop("lang", axis=1, inplace=True)
-            item['time'] = item['time'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
-        self.totalDF = self.normDF.copy()
-        self.totalDF = self.totalDF.append(self.xsDF.copy())
-        self.totalDF = self.totalDF.append(self.weaponDF.copy())
-        self.totalDF = self.totalDF.append(self.roleDF.copy())
-
+            self.xsDF = DataFrame(data["xsData"]["data"])
+            self.normDF = DataFrame(data["normData"]["data"])
+            self.roleDF = DataFrame(data["roleData"]["data"])
+            self.weaponDF = DataFrame(data["weaponData"]["data"])
+            for item in [self.xsDF, self.normDF, self.roleDF, self.weaponDF]:
+                if not item.empty:
+                    item.drop("uid", axis=1, inplace=True)
+                    item.drop("item_id", axis=1, inplace=True)
+                    item.drop("lang", axis=1, inplace=True)
+                    item['time'] = item['time'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
+            self.totalDF = self.normDF.copy()
+            for item in [self.xsDF, self.roleDF, self.weaponDF]:
+                if not item.empty:
+                    self.totalDF = self.totalDF.append(item.copy())
     # 日期，类型筛选
     # 传入起止时间以及涉及的池子列表，以及要处理的df
     # 返回DataFrame
@@ -112,7 +113,6 @@ class GachaData():
 
     # 饼图
     # [{"name":"text","value":300},]
-    # todo 空数据排错
     def gachaPie(self, df: DataFrame):
         countDict: dict = df[["item_type", "rank_type", "count"]].groupby(["rank_type", "item_type"]).count().to_dict()[
             "count"]
@@ -145,10 +145,11 @@ class GachaData():
         res = DataFrame([],
                         columns=['gacha_type', 'count', 'time', 'name', 'item_type', "rank_type", "id", "rank_count"])
         for item in [self.roleDF, self.xsDF, self.weaponDF, self.normDF]:
-            lastDF = self.getRankCount(item.copy(), "5")
-            lastDF2 = self.getRankCount(item.copy(), "4")
-            res = concat([lastDF2.copy(), res.copy()])
-            res = concat([lastDF.copy(), res.copy()])
+            if not item.empty:
+                lastDF = self.getRankCount(item.copy(), "5")
+                lastDF2 = self.getRankCount(item.copy(), "4")
+                res = concat([lastDF2.copy(), res.copy()])
+                res = concat([lastDF.copy(), res.copy()])
         res: DataFrame = res.sort_values(by=["id"]).reset_index(drop=True)
         res.loc[:, "time"] = res.loc[:, "time"].astype(str)
         df = DataFrame(self.charList)
@@ -162,21 +163,27 @@ class GachaData():
         writer = ExcelWriter('ysdata.xlsx', engine='xlsxwriter')
         for df, name in [(self.normDF.copy(), "常驻祈愿"), (self.xsDF.copy(), "新手祈愿"),
                          (self.roleDF.copy(), "角色活动祈愿"), (self.weaponDF.copy(), "武器活动祈愿")]:
-            res = self.getRankCount(df, "5")
-            df = df.sort_values(by="id").reset_index(drop=True)
-            df["time"] = df["time"].astype(str)
-            df.insert(df.shape[1], "totalCount", df.index + 1)
-            if len(res.index)>0:
-                count5List = [i + 1 for item in res["rank_count"] for i in range(int(item))] + [i for i in range(1, 1 + int(
-                    df.index[-1] - res.index[-1]))]
-            else:
-                tmp=df.index+1
-                count5List =tmp.tolist()
-            df.insert(df.shape[1], 'count5', count5List)
-            df.rename(columns={'time': '时间', 'name': '名称', 'item_type': "类别", "rank_type": "星级", "totalCount": '总次数',
-                               'count5': "保底内"}, inplace=True)
-            df.to_excel(writer, columns=['时间', '名称', '类别', '星级', '总次数', '保底内',"id"], index=False, encoding='utf-8',
-                        sheet_name=name)
+            if not df.empty:
+                res = self.getRankCount(df, "5")
+                df = df.sort_values(by="id").reset_index(drop=True)
+                df["time"] = df["time"].astype(str)
+                df.insert(df.shape[1], "totalCount", df.index + 1)
+                if len(res.index)>0:
+                    count5List = [i + 1 for item in res["rank_count"] for i in range(int(item))] + [i for i in range(1, 1 + int(
+                        df.index[-1] - res.index[-1]))]
+                else:
+                    tmp=df.index+1
+                    count5List =tmp.tolist()
+                df.insert(df.shape[1], 'count5', count5List)
+                df["rank_type"] = df["rank_type"].astype(int)
+                df.rename(columns={'time': '时间', 'name': '名称', 'item_type': "类别", "rank_type": "星级", "totalCount": '总次数',
+                                   'count5': "保底内"}, inplace=True)
+                df.to_excel(writer, columns=['时间', '名称', '类别', '星级', '总次数', '保底内',"id"], index=False, encoding='utf-8',
+                            sheet_name=name)
+            # else:
+            #     df.columns=['时间', '名称', '类别', '星级', '总次数', '保底内',"id"]
+            #     df.to_excel(writer, columns=['时间', '名称', '类别', '星级', '总次数', '保底内',"id"], index=False, encoding='utf-8',
+            #                 sheet_name=name)
         writer.save()
 
 
